@@ -18,9 +18,9 @@ export default async function handler(req, res) {
     let response;
 
     if (username) {
-      response = await client.lookupUserByUsername(username);
+      response = await client.lookupUserByUsername({ username });
     } else if (fid) {
-      response = await client.fetchUser(fid);
+      response = await client.fetchUserByFids({ fids: [parseInt(fid, 10)] });
     } else if (address) {
       response = await client.fetchBulkUsersByEthOrSolAddress({
         addresses: [address],
