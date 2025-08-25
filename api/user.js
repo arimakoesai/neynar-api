@@ -1,13 +1,10 @@
 import { Configuration, NeynarAPIClient } from "@neynar/nodejs-sdk";
 
 export default async function handler(req, res) {
-  const { username, fid, address } = req.query;
+  const { address } = req.query;
 
-  if (!username && !fid && !address) {
-    return res.status(400).json({
-      error:
-        "Harap isi salah satu query param: ?username= atau ?fid= atau ?address=",
-    });
+  if (!address) {
+    return res.status(400).json({ error: "Query param ?address= wajib diisi" });
   }
 
   try {
@@ -15,22 +12,14 @@ export default async function handler(req, res) {
       new Configuration({ apiKey: process.env.NEYNAR_API_KEY })
     );
 
-    let response;
-
-    if (username) {
-      response = await client.lookupUserByUsername({ username });
-    } else if (fid) {
-      response = await client.fetchUserByFids({ fids: [parseInt(fid, 10)] });
-    } else if (address) {
-      response = await client.fetchBulkUsersByEthOrSolAddress({
-        addresses: [address],
-        address_types: ["verified_address"],
-      });
-    }
+    const response = await client.fetchBulkUsersByEthOrSolAddress({
+      addresses: [address],
+      address_types: ["verified_address"],
+    });
 
     res.status(200).json(response);
   } catch (err) {
-    console.error("Error fetch Neynar:", err);
+    console.error("Error fetch Neynar:", err.response?.data || err.message);
     res.status(500).json({ error: "Gagal fetch dari Neynar" });
   }
 }
